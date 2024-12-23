@@ -1,0 +1,15 @@
+[general]
+threads = 5
+
+[[target]]
+package = "apache/2.4.52"
+log = "apache.log"
+execute = "./exploit.sh"
+misconfig = true
+
+[[target]]
+package = "nginx/1.27.2"
+log = "nginx.log"
+misconfig = false
+
+

@@ -1,0 +1,11 @@
+[package]
+name = "lazyscan"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.23", features = ["derive"] }
+reqwest = "0.12.8"
+scraper = "0.22.0"
+serde = { version = "1.0.216", features = ["derive"] }
+toml = "0.8.19"
