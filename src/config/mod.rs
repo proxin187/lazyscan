@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs;
 
 use serde::Deserialize;
@@ -5,21 +6,21 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct General {
-    threads: usize,
+    pub threads: usize,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Target {
-    package: String,
-    execute: Option<String>,
-    log: Option<String>,
-    misconfig: bool,
+    pub version: String,
+    pub execute: Option<String>,
+    pub log: Option<String>,
+    pub misconfig: bool,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    general: General,
-    target: Option<Vec<Target>>,
+    pub general: General,
+    pub target: HashMap<String, Target>,
 }
 
 impl Config {

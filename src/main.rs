@@ -2,6 +2,7 @@ mod crawler;
 mod config;
 mod scan;
 
+use crawler::Crawler;
 use config::Config;
 
 use clap::Parser;
@@ -21,6 +22,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("config: {:?}", config);
 
-    Ok(())
+    let crawler = Crawler::new(args.seed, config);
+
+    crawler.run()
 }
 

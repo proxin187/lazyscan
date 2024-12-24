@@ -1,14 +1,14 @@
 [general]
-threads = 5
+threads = 50
 
-[[target]]
-package = "apache/2.4.52"
+[target.apache]
+version = "2.4.52"
 log = "apache.log"
 execute = "./exploit.sh"
 misconfig = true
 
-[[target]]
-package = "nginx/1.27.2"
+[target.nginx]
+version = "1.27.2"
 log = "nginx.log"
 misconfig = false
 
