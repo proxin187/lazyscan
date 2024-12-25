@@ -26,24 +26,21 @@ impl Job {
     pub fn perform(&self, urls: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
         let selector = Selector::parse("a")?;
 
-        let next = urls.iter()
-            .filter_map(|url| {
-                // TODO: this ignores if the user provides an invalid url
+        for url in urls {
+            match blocking::get(&url).and_then(|response| response.text()) {
+                Ok(text) => {
+                    let next = Html::parse_document(&text)
+                        .select(&selector)
+                        .filter_map(|element| element.attr("href").map(|value| value.to_string()))
+                        .collect::<Vec<String>>();
 
-                blocking::get(url)
-                    .and_then(|response| response.text())
-                    .map(|text| {
-                        Html::parse_document(&text)
-                            .select(&selector)
-                            .filter_map(|element| element.attr("href").map(|value| value.to_string()))
-                            .collect::<Vec<String>>()
-                    })
-                    .ok()
-            })
-            .flatten()
-            .collect::<Vec<String>>();
-
-        lock!(self.queue)?.extend(next);
+                    lock!(self.queue)?.extend(next);
+                },
+                Err(_) => {
+                    println!("[warn] failed to get url: {:?}", url);
+                },
+            }
+        }
 
         Ok(())
     }
