@@ -2,7 +2,7 @@
 threads = 50
 
 [target.apache]
-version = "2.4.52"
+version = "2.4.52-57"
 log = "apache.log"
 execute = "./exploit.sh"
 misconfig = true

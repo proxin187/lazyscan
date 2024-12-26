@@ -10,7 +10,7 @@ pub struct General {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Target {
+pub struct TargetOptions {
     pub version: String,
     pub execute: Option<String>,
     pub log: Option<String>,
@@ -20,7 +20,7 @@ pub struct Target {
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub general: General,
-    pub target: HashMap<String, Target>,
+    pub target: HashMap<String, TargetOptions>,
 }
 
 impl Config {
