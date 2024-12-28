@@ -1,54 +1,115 @@
 mod apache;
+mod nginx;
 
 use crate::config::{Config, TargetOptions};
 
+use reqwest::header::{self, HeaderMap};
+
 use apache::Apache;
+use nginx::Nginx;
+
+use std::ops::Range;
 
 
-pub struct Version {
-    epochs: Vec<usize>,
+#[derive(Debug)]
+pub enum Epoch {
+    Range(Range<usize>),
+    Point(usize),
 }
 
-impl Version {
-    pub fn new(epochs: Vec<usize>) -> Version {
-        Version {
-            epochs,
+impl Epoch {
+    fn new(epoch: &str) -> Epoch {
+        let parts = epoch.split('-')
+            .filter_map(|part| part.parse::<usize>().ok())
+            .collect::<Vec<usize>>();
+
+        match parts.as_slice() {
+            [point] => Epoch::Point(*point),
+            [a, b] | [a, .., b] => Epoch::Range(*a..*b),
+            _ => unreachable!(),
         }
     }
 
-    pub fn parse(version: String) -> Version {
+    fn point(&self) -> Option<usize> {
+        match self {
+            Epoch::Point(point) => Some(*point),
+            Epoch::Range(_) => None,
+        }
+    }
+
+    fn contains(&self, other: &usize) -> bool {
+        match self {
+            Epoch::Range(range) => range.contains(other),
+            Epoch::Point(point) => point == other,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Version {
+    epochs: Vec<Epoch>,
+}
+
+impl Version {
+    pub fn parse(version: &str) -> Version {
         Version {
             epochs: version.split('.')
-                .filter_map(|epoch| epoch.parse::<usize>().ok())
-                .collect::<Vec<usize>>(),
+                .map(|epoch| Epoch::new(epoch))
+                .collect::<Vec<Epoch>>(),
         }
+    }
+
+    pub fn contains(&self, other: &Version) -> bool {
+        self.epochs.iter()
+            .zip(other.epochs.iter().filter_map(|epoch| epoch.point()))
+            .all(|(a, b)| a.contains(&b))
     }
 }
 
 pub trait Target {
-    fn verify(&self, url: &str) -> bool;
+    fn generic(&self, headers: &HeaderMap) -> Option<Version> {
+        headers.get(header::SERVER)
+            .and_then(|value| {
+                value.to_str()
+                    .ok()
+                    .and_then(|value| value.strip_prefix(&format!("{}/", self.name())))
+                    .and_then(|value| value.split(' ').next())
+            })
+            .map(|value| Version::parse(value))
+    }
+
+    fn verify(&self, url: &str, headers: &HeaderMap);
+
+    fn name(&self) -> String;
 }
 
 pub struct Scanner {
-    targets: Vec<Box<dyn Target>>,
+    targets: Vec<Box<dyn Target + Send + Sync>>,
 }
 
 impl Scanner {
-    pub fn new(config: Config) -> Scanner {
+    pub fn new(config: &Config) -> Scanner {
         let targets = config.target.iter()
             .filter_map(|(name, options)| target(&name, options))
-            .collect::<Vec<Box<dyn Target>>>();
+            .collect::<Vec<Box<dyn Target + Send + Sync>>>();
 
         Scanner {
             targets,
         }
     }
+
+    pub fn scan(&self, url: &str, headers: &HeaderMap) {
+        for target in self.targets.iter() {
+            target.verify(url, headers);
+        }
+    }
 }
 
 #[inline]
-fn target(name: &str, options: &TargetOptions) -> Option<Box<dyn Target>> {
+fn target(name: &str, options: &TargetOptions) -> Option<Box<dyn Target + Send + Sync>> {
     match name {
-        "apache" => None,
+        "apache" => Some(Box::new(Apache::new(options))),
+        "nginx" => Some(Box::new(Nginx::new(options))),
         _ => None,
     }
 }

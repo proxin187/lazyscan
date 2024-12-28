@@ -7,6 +7,8 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 pub struct General {
     pub threads: usize,
+    pub timeout: usize,
+    pub seeds: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]

@@ -12,7 +12,6 @@ use clap::Parser;
 #[command(name = "lazyscan", version, about, arg_required_else_help = true)]
 pub struct Args {
     config: String,
-    seed: String,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -20,9 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let config = Config::new(&args.config)?;
 
-    println!("config: {:?}", config);
-
-    let crawler = Crawler::new(args.seed, config);
+    let crawler = Crawler::new(config);
 
     crawler.run()
 }

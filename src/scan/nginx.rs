@@ -3,26 +3,26 @@ use super::{Target, Version, TargetOptions};
 use reqwest::header::HeaderMap;
 
 
-pub struct Apache {
+pub struct Nginx {
     version: Version,
     misconfig: bool,
 }
 
-impl Apache {
-    pub fn new(options: &TargetOptions) -> Apache {
-        Apache {
+impl Nginx {
+    pub fn new(options: &TargetOptions) -> Nginx {
+        Nginx {
             version: Version::parse(&options.version),
             misconfig: options.misconfig,
         }
     }
 }
 
-impl Target for Apache {
+impl Target for Nginx {
     fn verify(&self, url: &str, headers: &HeaderMap) {
         match self.generic(headers) {
             Some(version) => {
                 if self.version.contains(&version) {
-                    println!("url: {}, version: {:?}", url, version);
+                    // println!("url: {}, version: {:?}", url, version);
                 }
             },
             None => {},
@@ -30,7 +30,7 @@ impl Target for Apache {
     }
 
     fn name(&self) -> String {
-        String::from("Apache")
+        String::from("nginx")
     }
 }
 
