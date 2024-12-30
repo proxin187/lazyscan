@@ -5,6 +5,7 @@
 </a>
 
 <h4>lazyscan is a tool for finding and identifying websites with known vulnerabilities</h4>
+<br>
 </div>
 
 ## Features
