@@ -1,62 +1,18 @@
+mod queue;
+
 use crate::config::Config;
 use crate::scan::Scanner;
+
+use queue::Queue;
 
 use scraper::{Html, Selector};
 use reqwest::blocking::Client;
 use indicatif::{ProgressBar, ProgressStyle};
 
 use std::thread::{self, JoinHandle};
-use std::sync::{Arc, Mutex};
-use std::collections::HashMap;
 use std::time::Duration;
+use std::sync::Arc;
 
-macro_rules! lock {
-    ($mutex:expr) => {
-        $mutex.lock().map_err(|_| Into::<Box<dyn std::error::Error>>::into("failed to lock"))
-    }
-}
-
-#[derive(Clone)]
-pub struct Queue {
-    queue: Arc<Mutex<Vec<String>>>,
-    domains: Arc<Mutex<HashMap<String, ()>>>,
-}
-
-impl Queue {
-    pub fn new(seeds: Vec<String>) -> Queue {
-        Queue {
-            queue: Arc::new(Mutex::new(seeds)),
-            domains: Arc::new(Mutex::new(HashMap::new())),
-        }
-    }
-
-    pub fn push(&self, new: String) -> Result<(), Box<dyn std::error::Error>> {
-        let domain = new.split('/').take(3).collect::<String>();
-
-        if lock!(self.domains)?.insert(domain, ()).is_none() {
-            lock!(self.queue).map(|mut lock| lock.push(new))?;
-        }
-
-        Ok(())
-    }
-
-    pub fn extend(&self, extend: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
-        for new in extend {
-            self.push(new)?;
-        }
-
-        Ok(())
-    }
-
-    pub fn drain(&self) -> Result<Vec<String>, Box<dyn std::error::Error>> {
-        let mut lock = lock!(self.queue)?;
-
-        match lock.len() {
-            0 => Err("empty queue".into()),
-            _ => Ok(lock.drain(..).collect::<Vec<String>>()),
-        }
-    }
-}
 
 pub struct Job {
     queue: Queue,
