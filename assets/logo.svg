@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg164039" viewBox="0 0 1024 768" height="768px" width="1024px" version="1.1">
+
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg164039" viewBox="0 0 1024 175" height="175px" width="1024px" version="1.1">
   <metadata id="metadata164045">
     <rdf:rdf>
       <cc:work rdf:about="">
@@ -20,7 +21,7 @@
   </linearGradient>
   <g id="logo-group">
     <image xlink:href="" id="container" x="272" y="144" width="480" height="480" style="display: none;" transform="translate(0 0)"></image>
-    <g id="logo-center" transform="translate(5.684341886080802e-14 0)">
+    <g id="logo-center" transform="translate(5.684341886080802e-14 -300)">
       <image xlink:href="" id="icon_container" style="display: none;" x="0" y="0"></image>
       <g id="slogan" style="font-style:oblique;font-weight:300;font-size:32px;line-height:1;font-family:Lato;font-variant-ligatures:none;text-align:center;text-anchor:middle" transform="translate(0 0)"></g>
       <g id="title" style="font-style:normal;font-weight:normal;font-size:72px;line-height:1;font-family:'Brandmark Sans 2 Color';font-variant-ligatures:normal;text-align:center;text-anchor:middle" transform="translate(0 0)">
