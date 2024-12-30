@@ -1,7 +1,11 @@
 
-<img src="assets/logo.svg">
+<div align="center">
+<a href="https://github.com/proxin187/lazyscan">
+    <img src="assets/logo.svg">
+</a>
 
-lazyscan is a tool for finding and identifying websites running vulnerable versions of software.
+<h4>lazyscan is a tool for finding and identifying websites with known vulnerabilities</h4>
+</div>
 
 ## Features
 
