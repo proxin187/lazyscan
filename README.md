@@ -1,42 +1,5 @@
 
-<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg164039" viewBox="0 0 1024 768" height="768px" width="1024px" version="1.1">
-  <metadata id="metadata164045">
-    <rdf:rdf>
-      <cc:work rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"></dc:type>
-      </cc:work>
-    </rdf:rdf>
-  </metadata>
-  <defs id="defs164043"></defs>
-  <linearGradient spreadMethod="pad" y2="30%" x2="-10%" y1="120%" x1="30%" id="3d_gradient2-logo-57ba57e8-928a-4082-856c-4c51d07d1491">
-    <stop id="stop164020" stop-opacity="1" stop-color="#ffffff" offset="0%"></stop>
-    <stop id="stop164022" stop-opacity="1" stop-color="#000000" offset="100%"></stop>
-  </linearGradient>
-  <linearGradient gradientTransform="rotate(-30)" spreadMethod="pad" y2="30%" x2="-10%" y1="120%" x1="30%" id="3d_gradient3-logo-57ba57e8-928a-4082-856c-4c51d07d1491">
-    <stop id="stop164025" stop-opacity="1" stop-color="#ffffff" offset="0%"></stop>
-    <stop id="stop164027" stop-opacity="1" stop-color="#cccccc" offset="50%"></stop>
-    <stop id="stop164029" stop-opacity="1" stop-color="#000000" offset="100%"></stop>
-  </linearGradient>
-  <g id="logo-group">
-    <image xlink:href="" id="container" x="272" y="144" width="480" height="480" style="display: none;" transform="translate(0 0)"></image>
-    <g id="logo-center" transform="translate(5.684341886080802e-14 0)">
-      <image xlink:href="" id="icon_container" style="display: none;" x="0" y="0"></image>
-      <g id="slogan" style="font-style:oblique;font-weight:300;font-size:32px;line-height:1;font-family:Lato;font-variant-ligatures:none;text-align:center;text-anchor:middle" transform="translate(0 0)"></g>
-      <g id="title" style="font-style:normal;font-weight:normal;font-size:72px;line-height:1;font-family:'Brandmark Sans 2 Color';font-variant-ligatures:normal;text-align:center;text-anchor:middle" transform="translate(0 0)">
-        <g id="path164048" aria-label="L" transform="translate(0 314.43399999999997) translate(229.03070000000002 38.065999999999995) scale(1.25) translate(-320.6555 50.328)"> <path class="c1" d="M115.91309,115.33716v9.86523H84.08691V74.79761H95.3916v40.46826L115.91309,115.33716z" transform="translate(236.56859 -125.12561)" stroke-width="0" stroke-linejoin="miter" stroke-miterlimit="2" fill="#2de7a4" stroke="#2de7a4"></path> </g>
-        <g id="path164050" aria-label="A" transform="translate(0 314.43399999999997) translate(283.5058625 37.976) scale(1.25) translate(-354.23563 50.4)"> <polygon class="c1" points="106.19287,74.79785 94.23975,74.79785 73.78955,125.20215 85.31104,125.20215 92.0791,106.84082 92.0791,106.84082 99.85596,86.74268 114.18506,125.20215 126.21045,125.20215 " transform="translate(280.44608 -125.19785)" stroke-width="0" stroke-linejoin="miter" stroke-miterlimit="2" fill="#2de7a4" stroke="#2de7a4"></polygon> </g>
-        <g id="path164052" aria-label="Z" transform="translate(0 314.43399999999997) translate(365.3142874999999 37.976) scale(1.25) translate(-409.68237 50.4)"> <path class="c1" d="M120.88184,115.87793v9.28809H79.11816v-7.63184l33.84277-42.7002h7.48926v7.70459L94.02344,115.9502 L120.88184,115.87793z M99.35254,84.12256H80.05469v-9.28857h24.98633C105.04102,74.83398,105.18457,80.6665,99.35254,84.12256z" transform="translate(330.56421 -125.23398)" stroke-width="0" stroke-linejoin="miter" stroke-miterlimit="2" fill="#2de7a4" stroke="#2de7a4"></path> </g>
-        <g id="path164054" aria-label="Y" transform="translate(0 314.43399999999997) translate(433.3878874999999 37.976) scale(1.25) translate(-454.14125 50.4)"> <path class="c1" d="M88.11914,74.79785l17.6416,34.20313v16.20117H94.52832v-15.84082L76.95801,74.79785H88.11914z M123.04199,74.79785l-13.17676,26.06641c0,0-6.26465-0.93652-6.19238-9.93701l8.20898-16.12939H123.04199z" transform="translate(377.18324 -125.19785)" stroke-width="0" stroke-linejoin="miter" stroke-miterlimit="2" fill="#2de7a4" stroke="#2de7a4"></path> </g>
-        <g id="path164056" aria-label="S" transform="translate(0 314.43399999999997) translate(504.2163249999999 37.256) scale(1.25) translate(-500.804 50.976)"> <path class="c1" d="M104.28467,95.17578c7.48926,2.23193,15.91309,4.82422,15.91309,15.40918 c0,9.2168-7.41602,15.19336-18.86523,15.19336c-7.7041,0-15.69727-2.95215-21.53027-7.84863l4.32129-9.07227 c4.89551,4.32031,12.09668,7.41602,17.35352,7.41602c4.24805,0,6.76855-1.87207,6.76855-5.04004 c0-4.17676-4.6084-5.54492-9.9375-7.12891c-7.34473-2.16016-15.69727-4.6084-15.69727-14.90527 c0-9.07275,7.34473-14.97754,18.79395-14.97754c6.55273,0,13.39258,2.01611,18.43359,5.40039l-4.24902,9.28906 c-5.1123-3.02441-11.30469-5.11279-15.26465-5.11279c-3.67285,0-5.83301,1.58447-5.83301,4.24854 c0,4.03223,4.53711,5.40039,9.7207,6.98486L104.28467,95.17578z" transform="translate(421.00174 -125.19768)" stroke-width="0" stroke-linejoin="miter" stroke-miterlimit="2" fill="#2de7a4" stroke="#2de7a4"></path> </g>
-        <g id="path164058" aria-label="^C" transform="translate(0 314.43399999999997) translate(575.2852374999999 37.616) scale(1.25) translate(-547.65913 50.688)"> <path class="c1" d="M102.19629,84.1582c0,0-21.96191-0.64795-25.41797,25.77881 c-1.2959-3.09668-2.0166-6.48047-2.0166-10.08105c0-14.54541,11.7373-25.5625,27.29102-25.5625 c10.00879,0,18.43359,4.53662,23.18555,11.59277l-10.44043,4.68066c-2.95313-3.88818-7.63281-6.33643-12.60156-6.33643V84.1582z" transform="translate(472.89741 -124.98146)" stroke-width="0" stroke-linejoin="miter" stroke-miterlimit="2" fill="#2de7a4" stroke="#2de7a4"></path> <path class="c3" d="M102.19629,115.84131c4.89648,0,9.57715-2.44824,12.5293-6.33691l10.36914,4.6084 c-4.75293,7.05664-13.10547,11.59375-23.04199,11.59375c-2.16016,0-4.24902-0.2168-6.19336-0.64844 c-1.72754-0.64844-3.38379-1.51172-4.89648-2.73633c-4.17578-3.45605-5.61621-7.12891-6.12012-8.85645 c-1.72852-5.54492,0.14453-10.72949,1.2959-13.53711c0.07227,8.71289,7.84863,15.76953,16.12988,15.76953L102.19629,115.84131z" transform="translate(472.89741 -124.98146)" stroke-width="0" stroke-linejoin="miter" stroke-miterlimit="2" fill="#908585" stroke="#908585"></path> </g>
-        <g id="path164060" aria-label="A" transform="translate(0 314.43399999999997) translate(655.3808624999999 37.976) scale(1.25) translate(-601.73563 50.4)"> <polygon class="c1" points="106.19287,74.79785 94.23975,74.79785 73.78955,125.20215 85.31104,125.20215 92.0791,106.84082 92.0791,106.84082 99.85596,86.74268 114.18506,125.20215 126.21045,125.20215 " transform="translate(527.94608 -125.19785)" stroke-width="0" stroke-linejoin="miter" stroke-miterlimit="2" fill="#2de7a4" stroke="#2de7a4"></polygon> </g>
-        <g id="path164062" aria-label="N" transform="translate(0 314.43399999999997) translate(740.3392874999998 37.976) scale(1.25) translate(-659.70237 50.4)"> <path class="c1" d="M88.22705,74.79785l33.62695,50.4043h-11.59277L88.65967,92.36719v32.83496H78.146v-50.4043H88.22705z M121.854,74.79785v38.95508c-7.05664-4.32031-9.86426-12.60107-10.44043-14.61719V74.79785H121.854z" transform="translate(581.55637 -125.19785)" stroke-width="0" stroke-linejoin="miter" stroke-miterlimit="2" fill="#2de7a4" stroke="#2de7a4"></path> </g>
-              </g>
-      <image xlink:href="" id="icon" style="display: none;" x="0" y="0"></image>
-    </g>
-  </g>
-</svg>
+![logo](assets/logo.svg)
 
 lazyscan is a tool for finding and identifying websites running vulnerable versions of software.
 
