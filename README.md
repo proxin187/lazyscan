@@ -1,5 +1,5 @@
 
-<img src="https://github.com/ArdeshirV/sample/blob/master/gplv3.svg">
+<img src="assets/logo.svg">
 
 lazyscan is a tool for finding and identifying websites running vulnerable versions of software.
 
