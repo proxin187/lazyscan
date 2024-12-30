@@ -9,8 +9,6 @@ macro_rules! lock {
 
 
 pub trait Drain {
-    fn next(&mut self) -> Option<String>;
-
     fn length(&self) -> usize;
 
     fn chunks(self, size: usize) -> Vec<Box<dyn Drain>>;
@@ -57,13 +55,47 @@ impl Queue for MemoryQueue {
         Ok(())
     }
 
-    fn drain(&self) -> Result<Drain, Box<dyn std::error::Error>> {
+    fn drain(&self) -> Result<Box<dyn Drain>, Box<dyn std::error::Error>> {
         let mut lock = lock!(self.queue)?;
+
+        let drain = lock.drain(..).collect::<Vec<String>>();
 
         match lock.len() {
             0 => Err("empty queue".into()),
-            _ => Ok(lock.drain(..).collect::<Vec<String>>()),
+            _ => Ok(Box::new(MemoryDrain::new(drain))),
         }
+    }
+}
+
+pub struct MemoryDrain {
+    drain: Vec<String>,
+}
+
+impl MemoryDrain {
+    pub fn new(drain: Vec<String>) -> MemoryDrain {
+        MemoryDrain {
+            drain,
+        }
+    }
+}
+
+impl Drain for MemoryDrain {
+    fn length(&self) -> usize {
+        self.drain.len()
+    }
+
+    fn chunks(self, size: usize) -> Vec<Box<dyn Drain>> {
+        self.drain.chunks(size)
+            .map(|chunk| Box::new(MemoryDrain::new(chunk.to_vec())) as Box<dyn Drain>)
+            .collect::<Vec<Box<dyn Drain>>>()
+    }
+}
+
+impl Iterator for MemoryDrain {
+    type Item = String;
+
+    fn next(&mut self) -> Option<String> {
+        self.drain.pop()
     }
 }
 
