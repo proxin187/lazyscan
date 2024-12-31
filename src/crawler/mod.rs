@@ -3,7 +3,7 @@ mod queue;
 use crate::config::Config;
 use crate::scan::Scanner;
 
-use queue::Queue;
+use queue::{Queue, Drain, MemoryQueue};
 
 use scraper::{Html, Selector};
 use reqwest::blocking::Client;
@@ -15,14 +15,14 @@ use std::sync::Arc;
 
 
 pub struct Job {
-    queue: Queue,
+    queue: Arc<dyn Queue + Send + Sync>,
     scanner: Arc<Scanner>,
     client: Client,
     pb: ProgressBar,
 }
 
 impl Job {
-    pub fn new(queue: Queue, scanner: Arc<Scanner>, pb: ProgressBar) -> Job {
+    pub fn new(queue: Arc<dyn Queue + Send + Sync>, scanner: Arc<Scanner>, pb: ProgressBar) -> Job {
         Job {
             queue,
             scanner,
@@ -37,10 +37,10 @@ impl Job {
             .unwrap_or(format!("{}/{}", base, path.trim_start_matches('/')))
     }
 
-    pub fn perform(&self, urls: Vec<String>, timeout: usize) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn perform(&self, drain: Arc<dyn Drain + Send + Sync>, timeout: usize) -> Result<(), Box<dyn std::error::Error>> {
         let selector = Selector::parse("a")?;
 
-        for url in urls {
+        while let Some(url) = drain.pop()? {
             let builder = self.client.get(&url)
                 .timeout(Duration::from_secs(timeout as u64));
 
@@ -66,7 +66,7 @@ impl Job {
 }
 
 pub struct Crawler {
-    queue: Queue,
+    queue: Arc<dyn Queue + Send + Sync>,
     scanner: Arc<Scanner>,
     config: Config,
 }
@@ -74,7 +74,7 @@ pub struct Crawler {
 impl Crawler {
     pub fn new(config: Config) -> Crawler {
         Crawler {
-            queue: Queue::new(config.general.seeds.clone()),
+            queue: Arc::new(MemoryQueue::new(config.general.seeds.clone())),
             scanner: Arc::new(Scanner::new(&config)),
             config,
         }
@@ -85,8 +85,8 @@ impl Crawler {
 
         let mut layer: usize = 0;
 
-        while let Ok(queue) = self.queue.drain() {
-            let pb = ProgressBar::new(queue.len() as u64);
+        while let Ok(drain) = self.queue.drain() {
+            let pb = ProgressBar::new(drain.len()? as u64);
 
             pb.set_style(style.clone());
 
@@ -94,14 +94,15 @@ impl Crawler {
 
             let mut handles: Vec<JoinHandle<()>> = Vec::new();
 
-            for chunk in queue.chunks(queue.len().div_ceil(self.config.general.threads)).map(|chunk| chunk.to_vec()) {
+            for _ in 0..self.config.general.threads {
+                let drain = drain.clone();
                 let queue = self.queue.clone();
                 let scanner = self.scanner.clone();
                 let timeout = self.config.general.timeout;
                 let pb = pb.clone();
 
                 let handle = thread::spawn(move || {
-                    let _ = Job::new(queue, scanner, pb).perform(chunk, timeout);
+                    let _ = Job::new(queue, scanner, pb).perform(drain, timeout);
                 });
 
                 handles.push(handle);

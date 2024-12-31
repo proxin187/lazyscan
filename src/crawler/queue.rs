@@ -7,31 +7,28 @@ macro_rules! lock {
     }
 }
 
-
 pub trait Drain {
-    fn length(&self) -> usize;
+    fn len(&self) -> Result<usize, Box<dyn std::error::Error>>;
 
-    fn chunks(self, size: usize) -> Vec<Box<dyn Drain>>;
+    fn pop(&self) -> Result<Option<String>, Box<dyn std::error::Error>>;
 }
 
 pub trait Queue {
     fn extend(&self, extend: Vec<String>) -> Result<(), Box<dyn std::error::Error>>;
 
-    fn drain(&self) -> Result<Box<dyn Drain>, Box<dyn std::error::Error>>;
+    fn drain(&self) -> Result<Arc<dyn Drain + Send + Sync>, Box<dyn std::error::Error>>;
 }
 
-
-#[derive(Clone)]
 pub struct MemoryQueue {
-    queue: Arc<Mutex<Vec<String>>>,
-    domains: Arc<Mutex<HashMap<String, ()>>>,
+    queue: Mutex<Vec<String>>,
+    domains: Mutex<HashMap<String, ()>>,
 }
 
 impl MemoryQueue {
     pub fn new(seeds: Vec<String>) -> MemoryQueue {
         MemoryQueue {
-            queue: Arc::new(Mutex::new(seeds)),
-            domains: Arc::new(Mutex::new(HashMap::new())),
+            queue: Mutex::new(seeds),
+            domains: Mutex::new(HashMap::new()),
         }
     }
 
@@ -55,47 +52,37 @@ impl Queue for MemoryQueue {
         Ok(())
     }
 
-    fn drain(&self) -> Result<Box<dyn Drain>, Box<dyn std::error::Error>> {
+    fn drain(&self) -> Result<Arc<dyn Drain + Send + Sync>, Box<dyn std::error::Error>> {
         let mut lock = lock!(self.queue)?;
 
         let drain = lock.drain(..).collect::<Vec<String>>();
 
-        match lock.len() {
+        match drain.len() {
             0 => Err("empty queue".into()),
-            _ => Ok(Box::new(MemoryDrain::new(drain))),
+            _ => Ok(Arc::new(MemoryDrain::new(drain))),
         }
     }
 }
 
 pub struct MemoryDrain {
-    drain: Vec<String>,
+    drain: Mutex<Vec<String>>,
 }
 
 impl MemoryDrain {
     pub fn new(drain: Vec<String>) -> MemoryDrain {
         MemoryDrain {
-            drain,
+            drain: Mutex::new(drain),
         }
     }
 }
 
 impl Drain for MemoryDrain {
-    fn length(&self) -> usize {
-        self.drain.len()
+    fn len(&self) -> Result<usize, Box<dyn std::error::Error>> {
+        lock!(self.drain).map(|drain| drain.len())
     }
 
-    fn chunks(self, size: usize) -> Vec<Box<dyn Drain>> {
-        self.drain.chunks(size)
-            .map(|chunk| Box::new(MemoryDrain::new(chunk.to_vec())) as Box<dyn Drain>)
-            .collect::<Vec<Box<dyn Drain>>>()
-    }
-}
-
-impl Iterator for MemoryDrain {
-    type Item = String;
-
-    fn next(&mut self) -> Option<String> {
-        self.drain.pop()
+    fn pop(&self) -> Result<Option<String>, Box<dyn std::error::Error>> {
+        lock!(self.drain).map(|mut drain| drain.pop())
     }
 }
 
