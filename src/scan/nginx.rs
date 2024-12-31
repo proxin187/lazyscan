@@ -5,14 +5,12 @@ use reqwest::header::HeaderMap;
 
 pub struct Nginx {
     version: Version,
-    misconfig: bool,
 }
 
 impl Nginx {
     pub fn new(options: &TargetOptions) -> Nginx {
         Nginx {
             version: Version::parse(&options.version),
-            misconfig: options.misconfig,
         }
     }
 }

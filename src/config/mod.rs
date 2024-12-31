@@ -8,15 +8,14 @@ use serde::Deserialize;
 pub struct General {
     pub threads: usize,
     pub timeout: usize,
+    pub queue: String,
     pub seeds: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct TargetOptions {
     pub version: String,
-    pub execute: Option<String>,
-    pub log: Option<String>,
-    pub misconfig: bool,
+    pub modules: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]

@@ -11,7 +11,7 @@
 ## Features
 
 - Configurable crawling parameters such as threads, request timeout, queue (in-memory or file) and seeds
-- Uses multiple dependencies for efficient scanning and data handling
+- Detect CVE's for specific targets
 - Helps identify websites running outdated or vulnerable software versions
 
 ## Installation

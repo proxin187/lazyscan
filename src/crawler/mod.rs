@@ -3,7 +3,7 @@ mod queue;
 use crate::config::Config;
 use crate::scan::Scanner;
 
-use queue::{Queue, Drain, MemoryQueue};
+use queue::{Queue, Drain, MemoryQueue, FileQueue};
 
 use scraper::{Html, Selector};
 use reqwest::blocking::Client;
@@ -72,12 +72,12 @@ pub struct Crawler {
 }
 
 impl Crawler {
-    pub fn new(config: Config) -> Crawler {
-        Crawler {
-            queue: Arc::new(MemoryQueue::new(config.general.seeds.clone())),
+    pub fn new(config: Config) -> Result<Crawler, Box<dyn std::error::Error>> {
+        Ok(Crawler {
+            queue: queue(&config)?,
             scanner: Arc::new(Scanner::new(&config)),
             config,
-        }
+        })
     }
 
     pub fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
@@ -118,6 +118,16 @@ impl Crawler {
         }
 
         Ok(())
+    }
+}
+
+fn queue(config: &Config) -> Result<Arc<dyn Queue + Send + Sync>, Box<dyn std::error::Error>> {
+    let seeds = config.general.seeds.clone();
+
+    match config.general.queue.as_str() {
+        "memory" => Ok(Arc::new(MemoryQueue::new(seeds))),
+        "file" => Ok(Arc::new(FileQueue::new(seeds)?)),
+        _ => Err("invalid queue type".into()),
     }
 }
 

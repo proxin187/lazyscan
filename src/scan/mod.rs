@@ -60,12 +60,14 @@ impl Version {
     }
 
     pub fn contains(&self, other: &Version) -> bool {
-        self.epochs.iter()
-            .zip(other.epochs.iter().filter_map(|epoch| epoch.point()))
-            .all(|(a, b)| a.contains(&b))
+        self.epochs.len() == other.epochs.len()
+            && self.epochs.iter()
+                .zip(other.epochs.iter().filter_map(|epoch| epoch.point()))
+                .all(|(a, b)| a.contains(&b))
     }
 }
 
+// TODO: maybe we can represent this as a struct instead, the kind can just be a enum
 pub trait Target {
     fn generic(&self, headers: &HeaderMap) -> Option<Version> {
         headers.get(header::SERVER)

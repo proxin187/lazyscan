@@ -1,19 +1,16 @@
 [general]
 threads = 50
 timeout = 10
-queue = "file"
+queue = "memory"
+log = "lazyscan.log"
 
 seeds = ["https://soyjak.party", "https://4chan.org"]
 
 [target.apache]
-version = "2.4.52-57"
-log = "apache.log"
-execute = "./exploit.sh"
-misconfig = true
+version = "2.4.49-51"
+modules = ["CVE-2021-41773", "CVE-2021-42013"]
 
 [target.nginx]
 version = "1.27.2"
-log = "nginx.log"
-misconfig = false
 
 

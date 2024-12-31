@@ -19,7 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let config = Config::new(&args.config)?;
 
-    let crawler = Crawler::new(config);
+    let crawler = Crawler::new(config)?;
 
     crawler.run()
 }

@@ -5,14 +5,19 @@ use reqwest::header::HeaderMap;
 
 pub struct Apache {
     version: Version,
-    misconfig: bool,
+    modules: Vec<String>,
 }
 
 impl Apache {
     pub fn new(options: &TargetOptions) -> Apache {
         Apache {
             version: Version::parse(&options.version),
-            misconfig: options.misconfig,
+            modules: options.modules.clone(),
+        }
+    }
+
+    fn detect(&self) {
+        for module in self.modules.iter() {
         }
     }
 }
