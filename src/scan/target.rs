@@ -1,6 +1,7 @@
 use super::{Version, TargetOptions};
 
 use reqwest::header::{self, HeaderMap};
+use log::info;
 
 use std::process::Command;
 
@@ -12,7 +13,7 @@ pub struct Target {
 }
 
 impl Target {
-    pub fn new(name: String, options: &TargetOptions) -> Target {
+    pub fn new(name: &str, options: &TargetOptions) -> Target {
         Target {
             version: Version::parse(&options.version),
             modules: options.modules.clone(),
@@ -21,13 +22,15 @@ impl Target {
     }
 
     pub fn modules(&self, url: &str) -> Result<(), Box<dyn std::error::Error>> {
+        info!("{} running modules on {}", self.server, url);
+
         for module in self.modules.iter() {
             let status = Command::new(format!("modules/{}/{}.py", self.server.to_lowercase(), module))
                 .arg(url)
                 .status()?;
 
             if status.success() {
-                // TODO: we need to log here
+                info!("module success: {}", module);
             }
         }
 
@@ -49,11 +52,11 @@ impl Target {
 }
 
 #[inline]
-fn server(name: String) -> String {
+fn server(name: &str) -> String {
     match name.to_lowercase().as_str() {
         "apache" => String::from("Apache"),
         "nginx" => String::from("nginx"),
-        _ => name,
+        _ => name.to_string(),
     }
 }
 

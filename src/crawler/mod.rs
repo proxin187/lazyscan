@@ -7,7 +7,8 @@ use queue::{Queue, Drain, MemoryQueue, FileQueue};
 
 use scraper::{Html, Selector};
 use reqwest::blocking::Client;
-use indicatif::{ProgressBar, ProgressStyle};
+use indicatif::{ProgressBar, MultiProgress, ProgressStyle};
+use log::warn;
 
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
@@ -46,7 +47,9 @@ impl Job {
 
             match builder.send() {
                 Ok(response) => {
-                    self.scanner.scan(&url, response.headers());
+                    if let Err(err) = self.scanner.scan(&url, response.headers()) {
+                        warn!("{}: {}", url, err);
+                    }
 
                     let next = Html::parse_document(&response.text()?)
                         .select(&selector)
@@ -80,13 +83,13 @@ impl Crawler {
         })
     }
 
-    pub fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn run(&self, multi: MultiProgress) -> Result<(), Box<dyn std::error::Error>> {
         let style = ProgressStyle::with_template("[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")?.progress_chars("##-");
 
         let mut layer: usize = 0;
 
         while let Ok(drain) = self.queue.drain() {
-            let pb = ProgressBar::new(drain.len()? as u64);
+            let pb = multi.add(ProgressBar::new(drain.len()? as u64));
 
             pb.set_style(style.clone());
 
@@ -113,6 +116,8 @@ impl Crawler {
             }
 
             pb.finish_with_message("layer done");
+
+            multi.remove(&pb);
 
             layer += 1;
         }

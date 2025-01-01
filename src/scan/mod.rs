@@ -4,7 +4,7 @@ use target::Target;
 
 use crate::config::{Config, TargetOptions};
 
-use reqwest::header::{self, HeaderMap};
+use reqwest::header::HeaderMap;
 
 use std::ops::Range;
 
@@ -72,7 +72,7 @@ pub struct Scanner {
 impl Scanner {
     pub fn new(config: &Config) -> Scanner {
         let targets = config.target.iter()
-            .filter_map(|(name, options)| target(&name, options))
+            .map(|(name, options)| Target::new(&name, options))
             .collect::<Vec<Target>>();
 
         Scanner {
@@ -80,10 +80,14 @@ impl Scanner {
         }
     }
 
-    pub fn scan(&self, url: &str, headers: &HeaderMap) {
+    pub fn scan(&self, url: &str, headers: &HeaderMap) -> Result<(), Box<dyn std::error::Error>> {
         for target in self.targets.iter() {
-            target.verify(url, headers);
+            if target.scan(headers) {
+                target.modules(url)?;
+            }
         }
+
+        Ok(())
     }
 }
 

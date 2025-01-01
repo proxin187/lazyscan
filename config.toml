@@ -12,5 +12,6 @@ modules = ["CVE-2021-41773", "CVE-2021-42013"]
 
 [target.nginx]
 version = "1.27.2"
+modules = []
 
 
