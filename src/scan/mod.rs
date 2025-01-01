@@ -1,12 +1,10 @@
-mod apache;
-mod nginx;
+mod target;
+
+use target::Target;
 
 use crate::config::{Config, TargetOptions};
 
 use reqwest::header::{self, HeaderMap};
-
-use apache::Apache;
-use nginx::Nginx;
 
 use std::ops::Range;
 
@@ -67,33 +65,15 @@ impl Version {
     }
 }
 
-// TODO: maybe we can represent this as a struct instead, the kind can just be a enum
-pub trait Target {
-    fn generic(&self, headers: &HeaderMap) -> Option<Version> {
-        headers.get(header::SERVER)
-            .and_then(|value| {
-                value.to_str()
-                    .ok()
-                    .and_then(|value| value.strip_prefix(&format!("{}/", self.name())))
-                    .and_then(|value| value.split(' ').next())
-            })
-            .map(|value| Version::parse(value))
-    }
-
-    fn verify(&self, url: &str, headers: &HeaderMap);
-
-    fn name(&self) -> String;
-}
-
 pub struct Scanner {
-    targets: Vec<Box<dyn Target + Send + Sync>>,
+    targets: Vec<Target>,
 }
 
 impl Scanner {
     pub fn new(config: &Config) -> Scanner {
         let targets = config.target.iter()
             .filter_map(|(name, options)| target(&name, options))
-            .collect::<Vec<Box<dyn Target + Send + Sync>>>();
+            .collect::<Vec<Target>>();
 
         Scanner {
             targets,
@@ -104,15 +84,6 @@ impl Scanner {
         for target in self.targets.iter() {
             target.verify(url, headers);
         }
-    }
-}
-
-#[inline]
-fn target(name: &str, options: &TargetOptions) -> Option<Box<dyn Target + Send + Sync>> {
-    match name {
-        "apache" => Some(Box::new(Apache::new(options))),
-        "nginx" => Some(Box::new(Nginx::new(options))),
-        _ => None,
     }
 }
 
