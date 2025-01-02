@@ -25,8 +25,8 @@ impl Target {
         info!("{} running modules on {}", self.server, url);
 
         for module in self.modules.iter() {
-            let status = Command::new(format!("modules/{}/{}.py", self.server.to_lowercase(), module))
-                .arg(url)
+            let status = Command::new("python")
+                .args([format!("modules/{}/{}.py", self.server.to_lowercase(), module), url.to_string()])
                 .status()?;
 
             if status.success() {

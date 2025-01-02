@@ -4,23 +4,37 @@ use std::fs;
 use serde::Deserialize;
 
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct General {
     pub threads: usize,
     pub timeout: usize,
-    pub queue: String,
-    pub seeds: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct TargetOptions {
     pub version: String,
     pub modules: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Source {
+    File {
+        path: String,
+    },
+    Shodan {
+        query: String,
+    },
+    Crawler {
+        queue: String,
+        seeds: Vec<String>,
+    },
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct Config {
     pub general: General,
+    pub source: Source,
     pub target: HashMap<String, TargetOptions>,
 }
 

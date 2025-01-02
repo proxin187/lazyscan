@@ -8,7 +8,7 @@ use queue::{Queue, Drain, MemoryQueue, FileQueue};
 use scraper::{Html, Selector};
 use reqwest::blocking::Client;
 use indicatif::{ProgressBar, MultiProgress, ProgressStyle};
-use log::warn;
+use log::error;
 
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
@@ -48,7 +48,7 @@ impl Job {
             match builder.send() {
                 Ok(response) => {
                     if let Err(err) = self.scanner.scan(&url, response.headers()) {
-                        warn!("{}: {}", url, err);
+                        error!("failed to scan {}: {}", url, err);
                     }
 
                     let next = Html::parse_document(&response.text()?)
@@ -75,11 +75,11 @@ pub struct Crawler {
 }
 
 impl Crawler {
-    pub fn new(config: Config) -> Result<Crawler, Box<dyn std::error::Error>> {
+    pub fn new(config: &Config, queue: String, seeds: Vec<String>) -> Result<Crawler, Box<dyn std::error::Error>> {
         Ok(Crawler {
-            queue: queue(&config)?,
-            scanner: Arc::new(Scanner::new(&config)),
-            config,
+            queue: init_queue(queue, seeds)?,
+            scanner: Arc::new(Scanner::new(config)),
+            config: config.clone(),
         })
     }
 
@@ -126,10 +126,8 @@ impl Crawler {
     }
 }
 
-fn queue(config: &Config) -> Result<Arc<dyn Queue + Send + Sync>, Box<dyn std::error::Error>> {
-    let seeds = config.general.seeds.clone();
-
-    match config.general.queue.as_str() {
+fn init_queue(queue: String, seeds: Vec<String>) -> Result<Arc<dyn Queue + Send + Sync>, Box<dyn std::error::Error>> {
+    match queue.to_lowercase().as_str() {
         "memory" => Ok(Arc::new(MemoryQueue::new(seeds))),
         "file" => Ok(Arc::new(FileQueue::new(seeds)?)),
         _ => Err("invalid queue type".into()),
