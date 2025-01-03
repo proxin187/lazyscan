@@ -1,10 +1,9 @@
-use super::{Version, TargetOptions};
+use super::{TargetOptions, Version};
 
-use reqwest::header::{self, HeaderMap};
 use log::info;
+use reqwest::header::{self, HeaderMap};
 
 use std::process::Command;
-
 
 pub struct Target {
     version: Version,
@@ -26,7 +25,10 @@ impl Target {
 
         for module in self.modules.iter() {
             let status = Command::new("python")
-                .args([format!("modules/{}/{}.py", self.server.to_lowercase(), module), url.to_string()])
+                .args([
+                    format!("modules/{}/{}.py", self.server.to_lowercase(), module),
+                    url.to_string(),
+                ])
                 .status()?;
 
             if status.success() {
@@ -38,16 +40,20 @@ impl Target {
     }
 
     pub fn scan(&self, headers: &HeaderMap) -> bool {
-        let version = headers.get(header::SERVER)
+        let version = headers
+            .get(header::SERVER)
             .and_then(|value| {
-                value.to_str()
+                value
+                    .to_str()
                     .ok()
                     .and_then(|value| value.strip_prefix(&format!("{}/", self.server)))
                     .and_then(|value| value.split(' ').next())
             })
             .map(|value| Version::parse(value));
 
-        version.map(|version| self.version.contains(&version)).unwrap_or(false)
+        version
+            .map(|version| self.version.contains(&version))
+            .unwrap_or(false)
     }
 }
 
@@ -59,5 +65,3 @@ fn server(name: &str) -> String {
         _ => name.to_string(),
     }
 }
-
-

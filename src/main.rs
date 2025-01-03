@@ -1,16 +1,17 @@
-mod crawler;
 mod config;
+mod crawler;
 mod scan;
+mod shodan;
 
-use crawler::Crawler;
 use config::{Config, Source};
+use crawler::Crawler;
+use shodan::Shodan;
 
 use clap::Parser;
-use indicatif_log_bridge::LogWrapper;
-use indicatif::MultiProgress;
 use env_logger::Env;
+use indicatif::MultiProgress;
+use indicatif_log_bridge::LogWrapper;
 use log::LevelFilter;
-
 
 #[derive(Debug, Parser)]
 #[command(name = "lazyscan", version, about, arg_required_else_help = true)]
@@ -32,9 +33,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = Config::new(&args.config)?;
 
     match &config.source {
-        Source::File { path } => {
-        },
+        Source::File { path } => {},
         Source::Shodan { query } => {
+            let shodan = Shodan::new()?;
+
+            shodan.run(multi, query)?;
         },
         Source::Crawler { queue, seeds } => {
             let crawler = Crawler::new(&config, queue.clone(), seeds.clone())?;

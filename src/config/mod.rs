@@ -3,7 +3,6 @@ use std::fs;
 
 use serde::Deserialize;
 
-
 #[derive(Debug, Clone, Deserialize)]
 pub struct General {
     pub threads: usize,
@@ -19,16 +18,9 @@ pub struct TargetOptions {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Source {
-    File {
-        path: String,
-    },
-    Shodan {
-        query: String,
-    },
-    Crawler {
-        queue: String,
-        seeds: Vec<String>,
-    },
+    File { path: String },
+    Shodan { query: String },
+    Crawler { queue: String, seeds: Vec<String> },
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -45,5 +37,3 @@ impl Config {
         toml::from_str(&content).map_err(|err| err.into())
     }
 }
-
-

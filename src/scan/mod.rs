@@ -8,7 +8,6 @@ use reqwest::header::HeaderMap;
 
 use std::ops::Range;
 
-
 #[derive(Debug)]
 pub enum Epoch {
     Range(Range<usize>),
@@ -17,7 +16,8 @@ pub enum Epoch {
 
 impl Epoch {
     fn new(epoch: &str) -> Epoch {
-        let parts = epoch.split('-')
+        let parts = epoch
+            .split('-')
             .filter_map(|part| part.parse::<usize>().ok())
             .collect::<Vec<usize>>();
 
@@ -51,7 +51,8 @@ pub struct Version {
 impl Version {
     pub fn parse(version: &str) -> Version {
         Version {
-            epochs: version.split('.')
+            epochs: version
+                .split('.')
                 .map(|epoch| Epoch::new(epoch))
                 .collect::<Vec<Epoch>>(),
         }
@@ -59,7 +60,9 @@ impl Version {
 
     pub fn contains(&self, other: &Version) -> bool {
         self.epochs.len() == other.epochs.len()
-            && self.epochs.iter()
+            && self
+                .epochs
+                .iter()
                 .zip(other.epochs.iter().filter_map(|epoch| epoch.point()))
                 .all(|(a, b)| a.contains(&b))
     }
@@ -71,13 +74,13 @@ pub struct Scanner {
 
 impl Scanner {
     pub fn new(config: &Config) -> Scanner {
-        let targets = config.target.iter()
+        let targets = config
+            .target
+            .iter()
             .map(|(name, options)| Target::new(&name, options))
             .collect::<Vec<Target>>();
 
-        Scanner {
-            targets,
-        }
+        Scanner { targets }
     }
 
     pub fn scan(&self, url: &str, headers: &HeaderMap) -> Result<(), Box<dyn std::error::Error>> {
@@ -90,5 +93,3 @@ impl Scanner {
         Ok(())
     }
 }
-
-
