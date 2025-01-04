@@ -95,10 +95,7 @@ impl Crawler {
     }
 
     pub fn run(&self, multi: MultiProgress) -> Result<(), Box<dyn std::error::Error>> {
-        let style = ProgressStyle::with_template(
-            "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
-        )?
-        .progress_chars("##-");
+        let style = ProgressStyle::with_template("[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")?.progress_chars("##-");
 
         let mut layer: usize = 0;
 

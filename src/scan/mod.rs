@@ -5,6 +5,7 @@ use target::Target;
 use crate::config::{Config, TargetOptions};
 
 use reqwest::header::HeaderMap;
+use log::info;
 
 use std::ops::Range;
 

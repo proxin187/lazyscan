@@ -3,10 +3,12 @@ use std::fs;
 
 use serde::Deserialize;
 
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct General {
     pub threads: usize,
     pub timeout: usize,
+    pub log: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]

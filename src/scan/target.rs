@@ -31,7 +31,7 @@ impl Target {
                 ])
                 .status()?;
 
-            if status.success() {
+            if status.code() == Some(0) {
                 info!("module success: {}", module);
             }
         }
