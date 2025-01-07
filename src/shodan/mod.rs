@@ -13,15 +13,23 @@ use std::env;
 
 #[derive(Debug, Deserialize)]
 pub struct Host {
-    ip: u32,
+    pub ip: u32,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Search {
+    #[serde(rename = "matches")]
+    pub hosts: Vec<Host>,
+
+    pub total: usize,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum Response {
     Success {
-        #[serde(rename = "matches")]
-        hosts: Vec<Host>,
+        #[serde(flatten)]
+        search: Search,
     },
     Error {
         error: String,
@@ -45,53 +53,57 @@ impl Shodan {
         })
     }
 
-    fn search(&self, query: &str, page: usize) -> Result<Response, Box<dyn std::error::Error>> {
-        let result = self.client
-            .get(format!(
-                "https://api.shodan.io/shodan/host/search?key={}&query={}&page={}&facets=country",
-                self.key, query, page
-            ))
-            .send()?;
+    pub fn search(&self, query: &str, page: usize) -> Option<Search> {
+        let url = format!("https://api.shodan.io/shodan/host/search?key={}&query={}&page={}&facets=country", self.key, query, page);
 
-        Ok(result.json()?)
+        loop {
+            match self.client.get(&url).send().and_then(|response| response.json::<Response>()) {
+                Ok(response) => match response {
+                    Response::Success { search } => {
+                        info!("search successful");
+
+                        return Some(search);
+                    },
+                    Response::Error { .. } => {
+                        warn!("reached end of search");
+
+                        return None;
+                    },
+                },
+                Err(err) => {
+                    warn!("reqwest failed with `{}`, trying again", err);
+                },
+            }
+        }
     }
 
     pub fn run(&mut self, multi: MultiProgress, query: &str, timeout: u64) -> Result<(), Box<dyn std::error::Error>> {
         let style = ProgressStyle::with_template("[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")?.progress_chars("##-");
         let mut count = 0;
 
-        while !self.should_close {
+        while let Some(search) = self.search(query, count) {
             info!("searching {}", count);
 
-            match self.search(query, count)? {
-                Response::Success { hosts } => {
-                    let pb = multi.add(ProgressBar::new(hosts.len() as u64));
+            let pb = multi.add(ProgressBar::new(search.hosts.len() as u64));
 
-                    pb.set_style(style.clone());
+            pb.set_style(style.clone());
 
-                    for host in hosts {
-                        let url = format!("http://{}", Ipv4Addr::from_bits(host.ip));
+            for host in search.hosts {
+                let url = format!("http://{}", Ipv4Addr::from_bits(host.ip));
 
-                        match self.client.get(&url).timeout(Duration::from_secs(timeout)).send() {
-                            Ok(response) => {
-                                self.scanner.scan(&url, response.headers())?;
-                            },
-                            Err(err) => {
-                                error!("reqwest: {}", err);
-                            },
-                        }
+                match self.client.get(&url).timeout(Duration::from_secs(timeout)).send() {
+                    Ok(response) => {
+                        self.scanner.scan(&url, response.headers())?;
+                    },
+                    Err(err) => {
+                        error!("reqwest: {}", err);
+                    },
+                }
 
-                        pb.inc(1);
-                    }
-
-                    multi.remove(&pb);
-                },
-                Response::Error { error } => {
-                    error!("shodan: {}", error);
-
-                    self.should_close = true;
-                },
+                pb.inc(1);
             }
+
+            multi.remove(&pb);
 
             count += 1;
         }
