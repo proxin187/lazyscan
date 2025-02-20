@@ -1,10 +1,8 @@
 mod config;
-mod crawler;
 mod scan;
 mod shodan;
 
 use config::{Config, Source};
-use crawler::Crawler;
 use shodan::Shodan;
 
 use clap::Parser;
@@ -67,17 +65,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     LogWrapper::new(multi.clone(), logger).try_init()?;
 
-    match &config.source {
-        Source::File { path } => {},
-        Source::Shodan { query } => {
-            let mut shodan = Shodan::new(&config)?;
+    match config.source {
+        Source::Shodan { query, modules } => {
+            let mut shodan = Shodan::new(modules)?;
 
-            shodan.run(multi, query, config.general.timeout as u64)?;
-        },
-        Source::Crawler { queue, seeds } => {
-            let crawler = Crawler::new(&config, queue.clone(), seeds.clone())?;
-
-            crawler.run(multi)?;
+            shodan.run(multi, &query)?;
         },
     }
 

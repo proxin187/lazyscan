@@ -4,18 +4,8 @@ threads = 50
 
 log = "lazy.log"
 
-# [source.file]
-# path = "source.txt"
-
 [source.shodan]
-query = "apache 2.4.49"
-
-# [source.crawler]
-# queue = "memory"
-# seeds = ["https://soyjak.party", "https://4chan.org"]
-
-[target.apache]
-version = "2.4.49-51"
+query = "product:Apache version:2.4.49,2.4.50"
 modules = ["CVE-2021-41773", "CVE-2021-42013"]
 
 

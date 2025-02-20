@@ -1,4 +1,3 @@
-use crate::config::Config;
 use crate::scan::Scanner;
 
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
@@ -13,15 +12,15 @@ use std::env;
 
 #[derive(Debug, Deserialize)]
 pub struct Host {
-    pub ip: u32,
+    ip: u32,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Search {
     #[serde(rename = "matches")]
-    pub hosts: Vec<Host>,
+    hosts: Vec<Host>,
 
-    pub total: usize,
+    total: usize,
 }
 
 #[derive(Debug, Deserialize)]
@@ -40,72 +39,67 @@ pub struct Shodan {
     client: Client,
     scanner: Scanner,
     key: String,
-    should_close: bool,
 }
 
 impl Shodan {
-    pub fn new(config: &Config) -> Result<Shodan, Box<dyn std::error::Error>> {
+    pub fn new(modules: Vec<String>) -> Result<Shodan, Box<dyn std::error::Error>> {
         Ok(Shodan {
             client: Client::new(),
-            scanner: Scanner::new(config),
+            scanner: Scanner::new(modules),
             key: env::var("API_KEY")?,
-            should_close: false,
         })
     }
 
     pub fn search(&self, query: &str, page: usize) -> Option<Search> {
+        info!("searching query={}, page={}", query, page);
+
         let url = format!("https://api.shodan.io/shodan/host/search?key={}&query={}&page={}&facets=country", self.key, query, page);
 
-        loop {
-            match self.client.get(&url).send().and_then(|response| response.json::<Response>()) {
-                Ok(response) => match response {
-                    Response::Success { search } => {
-                        info!("search successful");
+        match self.client.get(&url).timeout(Duration::from_secs(60)).send().and_then(|response| response.json()) {
+            Ok(response) => match response {
+                Response::Success { search } => Some(search),
+                Response::Error { error } => {
+                    warn!("reached end of search: {}", error);
 
-                        return Some(search);
-                    },
-                    Response::Error { .. } => {
-                        warn!("reached end of search");
+                    None
+                },
+            },
+            Err(err) => {
+                warn!("reqwest failed with `{}`, ignoring", err);
 
-                        return None;
-                    },
-                },
-                Err(err) => {
-                    warn!("reqwest failed with `{}`, trying again", err);
-                },
-            }
+                None
+            },
         }
     }
 
-    pub fn run(&mut self, multi: MultiProgress, query: &str, timeout: u64) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn pages(&mut self, query: &str) -> Vec<Search>  {
+        match self.search(query, 0) {
+            Some(search) => {
+                info!("searching {} pages", search.total / 100);
+
+                (0..search.total / 100)
+                    .filter_map(|page| self.search(query, page))
+                    .collect::<Vec<Search>>()
+            },
+            None => Vec::new(),
+        }
+    }
+
+    pub fn run(&mut self, multi: MultiProgress, query: &str) -> Result<(), Box<dyn std::error::Error>> {
         let style = ProgressStyle::with_template("[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")?.progress_chars("##-");
-        let mut count = 0;
 
-        while let Some(search) = self.search(query, count) {
-            info!("searching {}", count);
-
+        for search in self.pages(query) {
             let pb = multi.add(ProgressBar::new(search.hosts.len() as u64));
 
             pb.set_style(style.clone());
 
             for host in search.hosts {
-                let url = format!("http://{}", Ipv4Addr::from_bits(host.ip));
-
-                match self.client.get(&url).timeout(Duration::from_secs(timeout)).send() {
-                    Ok(response) => {
-                        self.scanner.scan(&url, response.headers())?;
-                    },
-                    Err(err) => {
-                        error!("reqwest: {}", err);
-                    },
-                }
+                self.scanner.modules(format!("http://{}", Ipv4Addr::from_bits(host.ip)).as_str())?;
 
                 pb.inc(1);
             }
 
             multi.remove(&pb);
-
-            count += 1;
         }
 
         Ok(())

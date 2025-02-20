@@ -1,93 +1,32 @@
-mod target;
-
-use target::Target;
-
-use crate::config::{Config, TargetOptions};
-
-use reqwest::header::HeaderMap;
 use log::info;
 
-use std::ops::Range;
+use std::process::Command;
 
-#[derive(Debug)]
-pub enum Epoch {
-    Range(Range<usize>),
-    Point(usize),
-}
-
-impl Epoch {
-    fn new(epoch: &str) -> Epoch {
-        let parts = epoch
-            .split('-')
-            .filter_map(|part| part.parse::<usize>().ok())
-            .collect::<Vec<usize>>();
-
-        match parts.as_slice() {
-            [point] => Epoch::Point(*point),
-            [a, b] | [a, .., b] => Epoch::Range(*a..*b),
-            _ => unreachable!(),
-        }
-    }
-
-    fn point(&self) -> Option<usize> {
-        match self {
-            Epoch::Point(point) => Some(*point),
-            Epoch::Range(_) => None,
-        }
-    }
-
-    fn contains(&self, other: &usize) -> bool {
-        match self {
-            Epoch::Range(range) => range.contains(other),
-            Epoch::Point(point) => point == other,
-        }
-    }
-}
-
-#[derive(Debug)]
-pub struct Version {
-    epochs: Vec<Epoch>,
-}
-
-impl Version {
-    pub fn parse(version: &str) -> Version {
-        Version {
-            epochs: version
-                .split('.')
-                .map(|epoch| Epoch::new(epoch))
-                .collect::<Vec<Epoch>>(),
-        }
-    }
-
-    pub fn contains(&self, other: &Version) -> bool {
-        self.epochs.len() == other.epochs.len()
-            && self
-                .epochs
-                .iter()
-                .zip(other.epochs.iter().filter_map(|epoch| epoch.point()))
-                .all(|(a, b)| a.contains(&b))
-    }
-}
 
 pub struct Scanner {
-    targets: Vec<Target>,
+    modules: Vec<String>,
 }
 
 impl Scanner {
-    pub fn new(config: &Config) -> Scanner {
-        let targets = config
-            .target
-            .iter()
-            .map(|(name, options)| Target::new(&name, options))
-            .collect::<Vec<Target>>();
-
-        Scanner { targets }
+    pub fn new(modules: Vec<String>) -> Scanner {
+        Scanner {
+            modules,
+        }
     }
 
-    pub fn scan(&self, url: &str, headers: &HeaderMap) -> Result<(), Box<dyn std::error::Error>> {
-        for target in self.targets.iter() {
-            if target.scan(headers) {
-                target.modules(url)?;
+    pub fn modules(&self, url: &str) -> Result<(), Box<dyn std::error::Error>> {
+        info!("running modules on {}", url);
+
+        for module in self.modules.iter() {
+            let status = Command::new("python")
+                .args([
+                    format!("modules/{}.py", module),
+                    url.to_string(),
+                ])
+                .status()?;
+
+            if status.code() == Some(0) {
+                info!("module success: {}", module);
             }
         }
 
